@@ -49,3 +49,17 @@ Power BI Dashboard (Visualization & Insights)
 ---
 
 ## 📂 Project Structure
+disease-detection-project/
+│
+├── AzureDataFactory/        # ADF pipelines & data flow screenshots
+│
+├── databricks/              # Databricks transformation scripts
+│   └── population_transformation.py
+│
+├── sql/                     # SQL table creation scripts
+│
+├── powerbi/                 # Power BI dashboard file (.pbix)
+│
+├── images/                  # Architecture & workflow screenshots
+│
+└── README.md
