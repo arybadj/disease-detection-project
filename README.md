@@ -46,9 +46,10 @@ Power BI Dashboard (Visualization & Insights)
 - Python (PySpark)
 - SQL
 
----
+
 
 ## 📂 Project Structure
+```
 disease-detection-project/
 │
 ├── AzureDataFactory/        # ADF pipelines & data flow screenshots
