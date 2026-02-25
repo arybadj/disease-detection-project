@@ -1,0 +1,148 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "disease-detection-aryash"
+        },
+        "trigger_on_population_file_arrival_to_blob_properties_typeProperties_scope": {
+            "type": "string",
+            "defaultValue": "/subscriptions/6ab55b01-0a83-47de-b230-2afaafca7658/resourceGroups/Disease-Detection-PROJECT/providers/Microsoft.Storage/storageAccounts/diseasedetectionstorage"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_sql_hosptal_daily')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "ls_sql_disease_db",
+                    "type": "LinkedServiceReference"
+                },
+                "folder": { "name": "sqlize" },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    { "name": "country", "type": "varchar" },
+                    { "name": "country_code_2_digit", "type": "varchar" },
+                    { "name": "country_code_3_digit", "type": "varchar" },
+                    { "name": "population", "type": "bigint", "precision": 19 },
+                    { "name": "reported_date", "type": "date" },
+                    { "name": "hospital_occupancy_count", "type": "bigint", "precision": 19 },
+                    { "name": "icu_occupancy_count", "type": "bigint", "precision": 19 },
+                    { "name": "source", "type": "varchar" }
+                ],
+                "typeProperties": {
+                    "schema": "disease_reporting",
+                    "table": "hospital_admissions_daily"
+                }
+            }
+        },
+
+        {
+            "name": "[concat(parameters('factoryName'), '/pl_transform_population')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Notebook_population",
+                        "type": "DatabricksNotebook",
+                        "typeProperties": {
+                            "notebookPath": "/Users/aryash/disease_detection/trans/pop"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "ls_databricks_disease_population_data",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "folder": { "name": "process" }
+            }
+        },
+
+        {
+            "name": "[concat(parameters('factoryName'), '/pl_ingest_blob_files')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "check if file exists",
+                        "type": "Validation",
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "DS_blob_disease_c_tsv",
+                                "type": "DatasetReference"
+                            }
+                        }
+                    }
+                ],
+                "folder": { "name": "ingest" }
+            }
+        },
+
+        {
+            "name": "[concat(parameters('factoryName'), '/pl_sqlize_cases_and_death')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Copy data from ADLS toSQL",
+                        "type": "Copy",
+                        "typeProperties": {
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "preCopyScript": "TRUNCATE TABLE disease_reporting.cases_and_deaths"
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_clean_cases_and_death",
+                                "type": "DatasetReference"
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_sql_cases_and_death",
+                                "type": "DatasetReference"
+                            }
+                        ]
+                    }
+                ],
+                "folder": { "name": "sqlize" }
+            }
+        },
+
+        {
+            "name": "[concat(parameters('factoryName'), '/trigger_on_population_file_arrival_to_blob')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "runtimeState": "Started",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "pl_execute_population_data",
+                            "type": "PipelineReference"
+                        }
+                    }
+                ],
+                "type": "BlobEventsTrigger",
+                "typeProperties": {
+                    "blobPathBeginsWith": "/diseasedetection/blobs/population_by_age",
+                    "ignoreEmptyBlobs": true,
+                    "scope": "[parameters('trigger_on_population_file_arrival_to_blob_properties_typeProperties_scope')]",
+                    "events": ["Microsoft.Storage.BlobCreated"]
+                }
+            }
+        }
+    ]
+}

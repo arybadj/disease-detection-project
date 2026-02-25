@@ -1,0 +1,116 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "disease-detection-aryash"
+        },
+        "AzureBlobStorage1_Popn_by_Age_connectionString": {
+            "type": "secureString"
+        },
+        "AzureDataLakeStorage1_accountKey": {
+            "type": "secureString"
+        },
+        "ls_databricks_disease_population_data_accessToken": {
+            "type": "secureString"
+        },
+        "ls_sql_disease_db_password": {
+            "type": "secureString"
+        },
+        "AzureDataLakeStorage1_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://adlsgen2diseasedetection.dfs.core.windows.net/"
+        },
+        "Http_ecdc_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com"
+        },
+        "ls_databricks_disease_population_data_properties_typeProperties_existingClusterId": {
+            "type": "string",
+            "defaultValue": "1224-052304-25c4daxn"
+        },
+        "ls_sql_disease_db_properties_typeProperties_server": {
+            "type": "string",
+            "defaultValue": "diseasedetectiondb.database.windows.net"
+        },
+        "ls_sql_disease_db_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "disease-db"
+        },
+        "ls_sql_disease_db_properties_typeProperties_userName": {
+            "type": "string",
+            "defaultValue": "aryash"
+        },
+        "trigger_on_population_file_arrival_to_blob_properties_typeProperties_scope": {
+            "type": "string",
+            "defaultValue": "/subscriptions/6ab55b01-0a83-47de-b230-2afaafca7658/resourceGroups/Disease-Detection-PROJECT/providers/Microsoft.Storage/storageAccounts/diseasedetectionstorage"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureBlobStorage1_Popn_by_Age')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "[parameters('AzureBlobStorage1_Popn_by_Age_connectionString')]"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+                    "accountKey": {
+                        "type": "SecureString",
+                        "value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ls_databricks_disease_population_data')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": "https://adb-7405607522103057.17.azuredatabricks.net",
+                    "accessToken": {
+                        "type": "SecureString",
+                        "value": "[parameters('ls_databricks_disease_population_data_accessToken')]"
+                    },
+                    "existingClusterId": "[parameters('ls_databricks_disease_population_data_properties_typeProperties_existingClusterId')]"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ls_sql_disease_db')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "server": "[parameters('ls_sql_disease_db_properties_typeProperties_server')]",
+                    "database": "[parameters('ls_sql_disease_db_properties_typeProperties_database')]",
+                    "authenticationType": "SQL",
+                    "userName": "[parameters('ls_sql_disease_db_properties_typeProperties_userName')]",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('ls_sql_disease_db_password')]"
+                    }
+                }
+            }
+        }
+    ]
+}

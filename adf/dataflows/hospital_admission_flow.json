@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "Disease-Detection-Aryash"
+        },
+        "AzureBlobStorage1_Popn_by_Age_connectionString": {
+            "value": ""
+        },
+        "AzureDataLakeStorage1_accountKey": {
+            "value": ""
+        },
+        "ls_databricks_disease_population_data_accessToken": {
+            "value": ""
+        },
+        "ls_sql_disease_db_password": {
+            "value": ""
+        },
+        "AzureDataLakeStorage1_properties_typeProperties_url": {
+            "value": "https://adlsgen2diseasedetection.dfs.core.windows.net/"
+        },
+        "Http_ecdc_properties_typeProperties_url": {
+            "value": "https://raw.githubusercontent.com"
+        },
+        "ls_databricks_disease_population_data_properties_typeProperties_existingClusterId": {
+            "value": "1224-052304-25c4daxn"
+        },
+        "ls_sql_disease_db_properties_typeProperties_server": {
+            "value": "diseasedetectiondb.database.windows.net"
+        },
+        "ls_sql_disease_db_properties_typeProperties_database": {
+            "value": "disease-db"
+        },
+        "ls_sql_disease_db_properties_typeProperties_userName": {
+            "value": "Aryash"
+        },
+        "trigger_on_population_file_arrival_to_blob_properties_typeProperties_scope": {
+            "value": "/subscriptions/9f3a6c72-4d11-4e88-b2c7-1a5d93f6b821/resourceGroups/Disease-Detection-PROJECT/providers/Microsoft.Storage/storageAccounts/diseasedetectionstorage"
+        }
+    }
+}
