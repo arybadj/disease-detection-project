@@ -63,6 +63,7 @@ disease-detection-project/
 ├── images/                  # Architecture & workflow screenshots
 │
 └── README.md
+```
 ## 🔄 Data Pipeline Workflow
 
 ### 1️⃣ Data Ingestion
